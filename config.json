@@ -1,0 +1,10 @@
+{
+  "port": 8080,
+  "db": {
+    "host": "localhost",
+    "port": 5432,
+    "user": "postgres",
+    "password": "xyvafvyf123",
+    "name": "testdb"
+  }
+}
