@@ -5,13 +5,13 @@ import (
 	"ProjectCRUD/httphand"
 	"ProjectCRUD/postgres"
 	"ProjectCRUD/projectCRUDlogic"
-	"database/sql"
+	"context"
 	"flag"
 	"fmt"
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	//"github.com/gocraft/dbr"
+	"github.com/gocraft/dbr"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	db, err := sql.Open("postgres", cfg.DB.ConnectString())
+	db, err := dbr.Open("postgres", cfg.DB.ConnectString(),nil)
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -34,12 +34,30 @@ func main() {
 	logrus.Println("DB Connected...")
 
 	e := echo.New()
-	people := postgres.NewPostgresRepository(db)
-	au := projectCRUDlogic.NewPeopleUsecase(people)
-	httphand.NewPeopleHandler(e, au)
+	e.Use(DBRSessionMiddleware(db))
+	peopleRepo := postgres.NewPostgresRepository(db)
+	peopleService := projectCRUDlogic.NewPeopleUsecase(peopleRepo)
+	httphand.NewPeopleHandler(e, peopleService)
 	err = e.Start(fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
 		logrus.Fatal(err)
 	}
 
+}
+
+func DBRSessionMiddleware(db *dbr.Connection)echo.MiddlewareFunc  {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(eCtx echo.Context)error {
+				req:=eCtx.Request()
+				ctx := req.Context()
+				ctx = Newcontext(ctx,db)
+				eCtx.SetRequest(req.WithContext(ctx))
+				return next(eCtx)
+			}
+	}
+}
+
+
+func Newcontext(ctx context.Context, db *dbr.Connection) context.Context {
+	return context.WithValue(ctx, "dbrsession", db.NewSession(nil))
 }

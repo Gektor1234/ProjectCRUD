@@ -2,14 +2,14 @@ package projectCRUDapp
 
 import (
 	"context"
-	//"github.com/gocraft/dbr"
+	"github.com/gocraft/dbr"
 )
 
 type PeopleEntity struct {
-	Id        int64  `json:"id"`
-	Firstname string `json:"firstname"`
-	Lastname  string `json:"lastname"`
-	Age       int64  `json:"age"`
+	Id        dbr.NullInt64  `json:"id" db:"id"`
+	Firstname dbr.NullString `json:"firstname" db:"firstname"`
+	Lastname  dbr.NullString `json:"lastname" db:"lastname"`
+	Age       dbr.NullInt64  `json:"age" db:"age"`
 }
 
 type PeopleRepository interface {

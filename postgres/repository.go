@@ -3,44 +3,22 @@ package postgres
 import (
 	"ProjectCRUD/projectCRUDapp"
 	"context"
-	"database/sql"
 	"github.com/sirupsen/logrus"
+	"github.com/gocraft/dbr"
 )
 
 type postgresRepository struct {
-	db *sql.DB
 }
 
-func NewPostgresRepository(db *sql.DB) projectCRUDapp.PeopleRepository {
-	return &postgresRepository{db}
+func NewPostgresRepository(db *dbr.Connection) projectCRUDapp.PeopleRepository {
+	return &postgresRepository{}
 }
 func (p *postgresRepository) fetch(ctx context.Context, query string) (result []projectCRUDapp.PeopleEntity) {
-	rows, err := p.db.QueryContext(ctx, query)
+	session := ctx.Value("dbrsession").(*dbr.Session)
+	_,err := session.SelectBySql(query).LoadContext(ctx,&result)
 	if err != nil {
 		logrus.Error(err)
 		return nil
-	}
-	defer func() {
-		errRow := rows.Close()
-		if errRow != nil {
-			logrus.Error(errRow)
-		}
-	}()
-	result = make([]projectCRUDapp.PeopleEntity, 0)
-	for rows.Next() {
-		p := projectCRUDapp.PeopleEntity{}
-		err = rows.Scan(
-			&p.Id,
-			&p.Firstname,
-			&p.Lastname,
-			&p.Age,
-		)
-		if err != nil {
-			logrus.Error(err)
-			return nil
-		}
-		result = append(result, p)
-
 	}
 	return result
 }
@@ -52,8 +30,9 @@ func (p *postgresRepository) Fetch(ctx context.Context) (res []projectCRUDapp.Pe
 }
 
 func (p *postgresRepository) AddHuman(ctx context.Context, a *projectCRUDapp.PeopleEntity) error {
+	session := ctx.Value("dbrsession").(*dbr.Session)
 	query := "INSERT INTO PeopleEntity (id, firstname, lastname, age)VALUES($1, $2, $3, $4)"
-	res, err := p.db.QueryContext(ctx, query, a.Id, a.Firstname, a.Lastname, a.Age)
+	res, err := session.QueryContext(ctx, query, a.Id, a.Firstname, a.Lastname, a.Age)
 	if err != nil {
 		logrus.Println(err)
 	} else {
