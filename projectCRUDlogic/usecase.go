@@ -32,3 +32,30 @@ func (p *peopleusecase) AddHuman(ctx context.Context, a *projectCRUDapp.PeopleEn
 	}
 	return
 }
+
+func (p *peopleusecase)GetMan(ctx context.Context,id int64)([]projectCRUDapp.PeopleEntity,error)  {
+	res,err:= p.peopleRepo.GetMan(ctx,id)
+	if err != nil{
+		logrus.Println(err)
+		return nil, err
+	}
+	return res,err
+}
+
+func (p *peopleusecase)DeleteHuman(ctx context.Context,id int64)error{
+	err := p.peopleRepo.DeleteHuman(ctx,id)
+	if err != nil{
+		logrus.Println(err)
+		return err
+	}
+	return err
+}
+
+func (p *peopleusecase)UpdateHuman(ctx context.Context,pe *projectCRUDapp.PeopleEntity) error {
+	err := p.peopleRepo.UpdateHuman(ctx,pe)
+	if err != nil{
+		logrus.Println(err)
+		return err
+	}
+	return err
+}

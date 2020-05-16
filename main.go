@@ -8,10 +8,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/gocraft/dbr"
 	"github.com/labstack/echo"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"github.com/gocraft/dbr"
 )
 
 func main() {
