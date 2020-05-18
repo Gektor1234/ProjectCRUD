@@ -15,7 +15,7 @@ type PeopleEntity struct {
 type PeopleRepository interface {
 	Fetch(ctx context.Context) (res []PeopleEntity, err error)
 	AddHuman(ctx context.Context, a *PeopleEntity) error
-	GetMan(ctx context.Context,id int64)([]PeopleEntity,error)
+	GetMan(ctx context.Context,id int64,)(PeopleEntity,error)
 	DeleteHuman(ctx context.Context,id int64)error
 	UpdateHuman(ctx context.Context,pe *PeopleEntity)error
 }
@@ -23,7 +23,7 @@ type PeopleRepository interface {
 type PeopleUsecase interface {
 	Fetch(ctx context.Context) ([]PeopleEntity, error)
 	AddHuman(ctx context.Context, a *PeopleEntity) (err error)
-	GetMan(ctx context.Context,id int64)([]PeopleEntity,error)
+	GetMan(ctx context.Context,id int64)(PeopleEntity,error)
 	DeleteHuman(ctx context.Context,id int64)error
 	UpdateHuman(ctx context.Context,pe *PeopleEntity)error
 }

@@ -11,7 +11,7 @@ import (
 type postgresRepository struct {
 }
 
-func NewPostgresRepository(db *dbr.Connection) projectCRUDapp.PeopleRepository {
+func NewPostgresRepository(*dbr.Connection) projectCRUDapp.PeopleRepository {
 	return &postgresRepository{}
 }
 func (p *postgresRepository) fetch(ctx context.Context, query string) (result []projectCRUDapp.PeopleEntity,err error) {
@@ -46,35 +46,24 @@ func (p *postgresRepository) AddHuman(ctx context.Context, a *projectCRUDapp.Peo
 	return err
 }
 
-func (p *postgresRepository)getMan(ctx context.Context,id int64)( result []projectCRUDapp.PeopleEntity,err error)  {
-	query := "SELECT * FROM PeopleEntity WHERE id = $1"
+func (p *postgresRepository)getMan(ctx context.Context,id int64)( result projectCRUDapp.PeopleEntity,err error)  {
+	query := "SELECT * FROM PeopleEntity WHERE id = ?"
+	result = projectCRUDapp.PeopleEntity{}
 	session := ctx.Value("dbrsession").(*dbr.Session)
-	rows,err := session.QueryContext(ctx,query,id)
+	err = session.SelectBySql(query,id).LoadOneContext(ctx,&result)
 	if err != nil {
 		logrus.Error(err)
-		return nil,err
-	}
-	defer rows.Close()
-	result = make([]projectCRUDapp.PeopleEntity,0)
-	for rows.Next() {
-		people := projectCRUDapp.PeopleEntity{}
-		err = rows.Scan(
-			&people.Id, &people.Firstname, &people.Lastname, &people.Age)
-		if err != nil {
-			logrus.Println(err)
-			return nil, err
-		}
-		result = append(result, people)
+		return result,err
 	}
 	return result, nil
 }
 
 
-func (p *postgresRepository)GetMan(ctx context.Context,id int64) (res []projectCRUDapp.PeopleEntity,err error)  {
+func (p *postgresRepository)GetMan(ctx context.Context,id int64) (res projectCRUDapp.PeopleEntity,err error)  {
 	res,err = p.getMan(ctx, id)
 	if err != nil{
 		logrus.Println(err)
-		return nil, err
+		return res, err
 	}
 	return
 }
